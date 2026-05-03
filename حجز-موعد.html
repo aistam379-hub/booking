@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+  <title>DocBook — حجز موعد</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    :root {
+      --bg:        #f0fdfa;
+      --surface:   #ffffff;
+      --border:    #b2f5ea;
+      --border-strong: #81e6d9;
+      --primary:       #0d9488;
+      --primary-hover: #0f766e;
+      --primary-light: #ccfbf1;
+      --primary-faint: #f0fdfa;
+      --text:      #134e4a;
+      --text-muted:#5f9ea0;
+      --red:       #dc2626;
+      --red-light: #fee2e2;
+      --green:     #16a34a;
+      --green-light:#dcfce7;
+      --amber:     #d97706;
+      --amber-light:#fef3c7;
+      --radius:    14px;
+      --radius-lg: 20px;
+      --shadow:    0 4px 24px rgba(13,148,136,.13);
+      --shadow-lg: 0 8px 40px rgba(13,148,136,.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .page-header .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #2dd4bf);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+      box-shadow: 0 0 0 6px var(--primary-light), var(--shadow);
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .page-header p {
+      font-size: .88rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Steps ── */
+    .steps-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 28px;
+    }
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: .78rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .3s;
+      flex-shrink: 0;
+    }
+    .step-dot.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .step-dot.done {
+      border-color: var(--green);
+      background: var(--green);
+      color: white;
+    }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      max-width: 56px;
+      transition: background .3s;
+    }
+    .step-line.done { background: var(--green); }
+
+    /* ── Form ── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .form-label {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: .92rem;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+    select.form-input {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235f9ea0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 14px center;
+      padding-left: 36px;
+    }
+
+    /* ── Period Selector ── */
+    .period-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .period-btn {
+      padding: 16px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all .18s;
+      text-align: center;
+      font-family: inherit;
+    }
+    .period-btn:hover { border-color: var(--primary); background: var(--primary-faint); }
+    .period-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+    }
+    .period-btn .period-icon { font-size: 1.5rem; margin-bottom: 6px; }
+    .period-btn .period-label { font-size: .88rem; font-weight: 700; color: var(--text); }
+    .period-btn .period-sub { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Calendar ── */
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .cal-nav {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: .85rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .cal-nav:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .cal-month { font-weight: 700; font-size: .92rem; color: var(--text); }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+    .cal-day-name {
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 4px 0;
+    }
+    .cal-day {
+      padding: 9px 2px;
+      border-radius: 9px;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      background: transparent;
+      color: var(--text);
+      font-size: .82rem;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all .15s;
+      position: relative;
+    }
+    .cal-day:not(.disabled):hover {
+      background: var(--primary-light);
+      border-color: var(--border-strong);
+    }
+    .cal-day.today { color: var(--primary); border-color: var(--primary); font-weight: 800; }
+    .cal-day.selected {
+      background: var(--primary) !important;
+      color: white !important;
+      border-color: transparent !important;
+      box-shadow: 0 2px 8px rgba(13,148,136,.35);
+    }
+    .cal-day.disabled { opacity: .3; cursor: not-allowed; pointer-events: none; }
+    .cal-day.closed {
+      opacity: .35;
+      cursor: not-allowed;
+      pointer-events: none;
+      text-decoration: line-through;
+    }
+
+    /* ── Summary Box ── */
+    .summary-box {
+      background: var(--primary-light);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .85rem;
+    }
+    .summary-row .label { color: var(--text-muted); font-weight: 600; }
+    .summary-row .value { font-weight: 700; color: var(--text); }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-weight: 800;
+      font-size: .95rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      width: 100%;
+      background: #e2e8f0;
+      color: #475569;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: .9rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { background: #cbd5e1; }
+
+    .btns-row { display: flex; gap: 10px; margin-top: 6px; }
+    .btns-row .btn-primary,
+    .btns-row .btn-secondary { flex: 1; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: .78rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1.5px;
+      background: var(--border);
+    }
+
+    /* ── Error ── */
+    .field-error {
+      font-size: .75rem;
+      color: var(--red);
+      font-weight: 600;
+      display: none;
+    }
+    .form-input.invalid { border-color: var(--red); }
+
+    /* ── Success Screen ── */
+    .success-screen {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .success-icon {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--green-light);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--green);
+      margin-bottom: 16px;
+      box-shadow: 0 0 0 8px rgba(22,163,74,.08);
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .success-screen h2 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .success-screen p  { font-size: .88rem; color: var(--text-muted); line-height: 1.6; }
+    .success-summary {
+      background: var(--primary-light);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin: 18px 0;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ── Closed banner ── */
+    .closed-banner {
+      background: var(--red-light);
+      border: 1.5px solid #fca5a5;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: .82rem;
+      color: var(--red);
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .card { padding: 22px 16px; }
+      body { padding: 16px 12px 40px; }
+    }
+  </style>
+
+  <!-- ═══════════════ PWA — DocBook ═══════════════ -->
+  <meta name="theme-color" content="#0d9488" />
+  <meta name="application-name" content="DocBook" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DocBook" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="msapplication-TileColor" content="#0d9488" />
+  <meta name="description" content="DocBook — احجز موعدك الطبي بكل سهولة" />
+  
+  
+  <!-- ════════════════════════════════════════════ -->
+
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>if(!firebase.apps.length)firebase.initializeApp({"apiKey":"AIzaSyB-M9i-jL4UdVdTthBGBPCuvZc33OvJl3g","authDomain":"dockbook-75008.firebaseapp.com","projectId":"dockbook-75008","storageBucket":"dockbook-75008.firebasestorage.app","messagingSenderId":"823956622674","appId":"1:823956622674:web:7c0e8a63cb60a29b5ffe8b"});var db=firebase.firestore();</script>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="logo"><i class="fas fa-calendar-check"></i></div>
+    <h1>حجز موعد</h1>
+    <p>أدخل بياناتك لحجز موعدك بسهولة</p>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Steps -->
+    <div class="steps-bar" id="stepsBar">
+      <div class="step-dot active" id="dot1">١</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" id="dot2">٢</div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" id="dot3">٣</div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot" id="dot4">٤</div>
+    </div>
+
+    <!-- ══ Step 1: Patient Info ══ -->
+    <div id="step1">
+      <div class="section-title"><i class="fas fa-user"></i> بيانات المريض</div>
+
+      <div class="form-group">
+        <label class="form-label">الاسم الكامل <span style="color:var(--red)">*</span></label>
+        <input type="text" id="patientName" class="form-input" placeholder="أدخل اسمك الكامل">
+        <span class="field-error" id="errName">يرجى إدخال الاسم الكامل</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">رقم الهاتف <span style="color:var(--red)">*</span></label>
+        <input type="tel" id="patientPhone" class="form-input" placeholder="05xxxxxxxx" dir="ltr">
+        <span class="field-error" id="errPhone">يرجى إدخال رقم هاتف صحيح</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">تاريخ الميلاد <span style="color:var(--red)">*</span></label>
+        <input type="date" id="patientBirth" class="form-input">
+        <span class="field-error" id="errBirth">يرجى إدخال تاريخ الميلاد</span>
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">نوع الزيارة <span style="color:var(--red)">*</span></label>
+        <select id="visitType" class="form-input">
+          <option value="">-- اختر نوع الزيارة --</option>
+          <option value="كشف جديد">كشف جديد</option>
+          <option value="مراجعة">مراجعة</option>
+          <option value="تحاليل">تحاليل</option>
+        </select>
+        <span class="field-error" id="errType">يرجى اختيار نوع الزيارة</span>
+      </div>
+
+      <div style="margin-top: 22px;">
+        <button class="btn-primary" onclick="goStep2()">
+          التالي <i class="fas fa-arrow-left"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ Step 2: Period ══ -->
+    <div id="step2" style="display:none;">
+      <div class="section-title"><i class="fas fa-clock"></i> الفترة</div>
+      <p style="font-size:.85rem; color:var(--text-muted); margin-bottom:16px;">اختر الفترة المناسبة لزيارتك</p>
+
+      <div class="period-grid">
+        <button class="period-btn" id="btnMorning" onclick="selectPeriod('Morning')">
+          <div class="period-icon">🌅</div>
+          <div class="period-label">صباحاً</div>
+          <div class="period-sub">الفترة الصباحية</div>
+        </button>
+        <button class="period-btn" id="btnEvening" onclick="selectPeriod('Evening')">
+          <div class="period-icon">🌙</div>
+          <div class="period-label">مساءً</div>
+          <div class="period-sub">الفترة المسائية</div>
+        </button>
+      </div>
+      <span class="field-error" id="errPeriod" style="display:block; text-align:center; margin-top:8px; display:none;">يرجى اختيار الفترة</span>
+
+      <div class="btns-row" style="margin-top:24px;">
+        <button class="btn-secondary" onclick="goStep(1)"><i class="fas fa-arrow-right"></i> رجوع</button>
+        <button class="btn-primary" onclick="goStep3()">التالي <i class="fas fa-arrow-left"></i></button>
+      </div>
+    </div>
+
+    <!-- ══ Step 3: Calendar ══ -->
+    <div id="step3" style="display:none;">
+      <div class="section-title"><i class="fas fa-calendar-alt"></i> اختر التاريخ</div>
+
+      <div class="closed-banner" id="closedBanner">
+        <i class="fas fa-ban"></i>
+        هذا اليوم مغلق — الرجاء اختيار يوم آخر
+      </div>
+
+      <!-- Calendar widget -->
+      <div style="background:var(--primary-faint); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:16px;">
+        <div class="cal-header">
+          <button class="cal-nav" id="calPrev" onclick="calNav(-1)"><i class="fas fa-chevron-right"></i></button>
+          <span class="cal-month" id="calMonthLabel">—</span>
+          <button class="cal-nav" id="calNext" onclick="calNav(1)"><i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div class="cal-grid" style="margin-bottom:6px;">
+          <div class="cal-day-name">سبت</div>
+          <div class="cal-day-name">جمعة</div>
+          <div class="cal-day-name">خميس</div>
+          <div class="cal-day-name">أربعاء</div>
+          <div class="cal-day-name">ثلاثاء</div>
+          <div class="cal-day-name">إثنين</div>
+          <div class="cal-day-name">أحد</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div id="selectedDateDisplay" style="display:none; background:var(--amber-light); border:1.5px solid #fcd34d; border-radius:10px; padding:10px 14px; font-size:.85rem; font-weight:700; color:var(--amber); text-align:center; margin-bottom:14px;">
+        <i class="fas fa-calendar-check" style="margin-left:6px;"></i>
+        <span id="selectedDateText">—</span>
+      </div>
+      <span class="field-error" id="errDate" style="text-align:center; margin-bottom:10px;">يرجى اختيار تاريخ</span>
+
+      <div class="btns-row">
+        <button class="btn-secondary" onclick="goStep(2)"><i class="fas fa-arrow-right"></i> رجوع</button>
+        <button class="btn-primary" onclick="goStep4()">التالي <i class="fas fa-arrow-left"></i></button>
+      </div>
+    </div>
+
+    <!-- ══ Step 4: Confirm ══ -->
+    <div id="step4" style="display:none;">
+      <div class="section-title"><i class="fas fa-check-circle"></i> مراجعة وتأكيد</div>
+
+      <div class="summary-box" id="summaryBox" style="margin-bottom:20px;"></div>
+
+      <p style="font-size:.78rem; color:var(--text-muted); text-align:center; margin-bottom:16px; line-height:1.6;">
+        سيتم إرسال الطلب للممرضة وستتواصل معك بعد التأكيد
+      </p>
+
+      <div class="btns-row">
+        <button class="btn-secondary" onclick="goStep(3)"><i class="fas fa-arrow-right"></i> رجوع</button>
+        <button class="btn-primary" id="submitBtn" onclick="submitBooking()">
+          <i class="fas fa-paper-plane"></i> إرسال الطلب
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ Success ══ -->
+    <div id="stepSuccess" style="display:none;">
+      <div class="success-screen">
+        <div class="success-icon"><i class="fas fa-check"></i></div>
+        <h2>تم إرسال طلبك!</h2>
+        <p>سيتم مراجعة طلبك من قِبَل الممرضة وتأكيده في أقرب وقت</p>
+
+        <div class="success-summary" id="successSummary"></div>
+
+        <button class="btn-primary" onclick="resetForm()" style="margin-top:8px;">
+          <i class="fas fa-plus"></i> حجز موعد جديد
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <p style="margin-top:20px; font-size:.72rem; color:var(--text-muted); text-align:center; opacity:.7;">
+    DocBook — نظام إدارة المواعيد
+  </p>
+
+<script>
+  // ─── State ───────────────────────────────────────────
+  let state = { name:'', phone:'', birth:'', visitType:'', period:'', date:'' };
+  let closedDays = []; // تُحدَّث من Firestore مباشرة
+
+  // ─── Helpers ─────────────────────────────────────────
+  function toISO(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function parseISO(s) {
+    const [y,m,d] = s.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+  function formatAr(s) {
+    if (!s) return '-';
+    return parseISO(s).toLocaleDateString('ar-EG', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  }
+
+  // ─── Steps navigation ────────────────────────────────
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = toISO(today);
+
+  function showStep(n) {
+    [1,2,3,4,'Success'].forEach(s => {
+      const el = document.getElementById('step'+s);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById('step'+n).style.display = 'block';
+
+    if (n !== 'Success') {
+      [1,2,3,4].forEach(i => {
+        const dot  = document.getElementById('dot'+i);
+        const line = document.getElementById('line'+i);
+        if (i < n)       { dot.className = 'step-dot done'; dot.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>'; }
+        else if (i === n){ dot.className = 'step-dot active'; dot.textContent = ['١','٢','٣','٤'][i-1]; }
+        else             { dot.className = 'step-dot'; dot.textContent = ['١','٢','٣','٤'][i-1]; }
+        if (line) line.className = i < n ? 'step-line done' : 'step-line';
+      });
+    }
+    if (n === 'Success') {
+      document.getElementById('stepsBar').style.display = 'none';
+    }
+  }
+
+  function goStep(n) { showStep(n); }
+
+  // ─── Step 1 validation ───────────────────────────────
+  function goStep2() {
+    const name  = document.getElementById('patientName').value.trim();
+    const phone = document.getElementById('patientPhone').value.trim();
+    const birth = document.getElementById('patientBirth').value;
+    const type  = document.getElementById('visitType').value;
+
+    toggle('errName',  !name,   'patientName');
+    toggle('errPhone', phone.length < 7, 'patientPhone');
+    toggle('errBirth', !birth,  'patientBirth');
+    toggle('errType',  !type,   'visitType');
+
+    if (!name || phone.length < 7 || !birth || !type) return;
+
+    state.name = name; state.phone = phone;
+    state.birth = birth; state.visitType = type;
+    showStep(2);
+  }
+
+  function toggle(errId, show, inputId) {
+    const err   = document.getElementById(errId);
+    const input = document.getElementById(inputId);
+    err.style.display   = show ? 'block' : 'none';
+    if (input) { input.classList.toggle('invalid', show); }
+  }
+
+  // ─── Step 2 ──────────────────────────────────────────
+  let selectedPeriod = '';
+  function selectPeriod(p) {
+    selectedPeriod = p;
+    document.getElementById('btnMorning').classList.toggle('selected', p === 'Morning');
+    document.getElementById('btnEvening').classList.toggle('selected', p === 'Evening');
+    document.getElementById('errPeriod').style.display = 'none';
+  }
+  function goStep3() {
+    if (!selectedPeriod) {
+      document.getElementById('errPeriod').style.display = 'block';
+      return;
+    }
+    state.period = selectedPeriod;
+    showStep(3);
+    renderCalendar();
+  }
+
+  // ─── Calendar ────────────────────────────────────────
+  const monthsAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  let calDate = new Date(today);
+  let selectedDate = '';
+
+  function calNav(dir) {
+    calDate.setMonth(calDate.getMonth() + dir);
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    const maxDate = new Date(today); maxDate.setMonth(maxDate.getMonth() + 3);
+    const y = calDate.getFullYear(), m = calDate.getMonth();
+    document.getElementById('calMonthLabel').textContent = `${monthsAr[m]} ${y}`;
+
+    const prevStart = new Date(y, m, 1);
+    document.getElementById('calPrev').disabled = prevStart <= today;
+
+    const lastDay  = new Date(y, m+1, 0);
+    const startDOW = new Date(y, m, 1).getDay();
+    const offset   = (6 - startDOW + 7) % 7;
+
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < offset; i++) {
+      grid.appendChild(document.createElement('div'));
+    }
+
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const dateObj = new Date(y, m, d);
+      const dateStr = toISO(dateObj);
+      const btn = document.createElement('button');
+      btn.textContent = d;
+      btn.className = 'cal-day';
+
+      if (dateStr === todayStr)     btn.classList.add('today');
+      if (dateStr === selectedDate) btn.classList.add('selected');
+      if (dateObj < today || dateObj > maxDate) { btn.classList.add('disabled'); }
+      else if (closedDays.includes(dateStr))    { btn.classList.add('closed'); }
+      else { btn.onclick = () => pickDay(dateStr, btn); }
+
+      grid.appendChild(btn);
+    }
+  }
+
+  function pickDay(dateStr, btn) {
+    selectedDate = dateStr;
+    state.date   = dateStr;
+    document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('closedBanner').style.display = 'none';
+    document.getElementById('selectedDateText').textContent = formatAr(dateStr);
+    document.getElementById('selectedDateDisplay').style.display = 'block';
+    document.getElementById('errDate').style.display = 'none';
+  }
+
+  function goStep4() {
+    if (!selectedDate) {
+      document.getElementById('errDate').style.display = 'block';
+      return;
+    }
+    state.date = selectedDate;
+
+    const box  = document.getElementById('summaryBox');
+    const rows = [
+      { label: '👤 الاسم',         value: state.name },
+      { label: '📞 الهاتف',        value: state.phone },
+      { label: '🎂 تاريخ الميلاد', value: formatAr(state.birth) },
+      { label: '🩺 نوع الزيارة',   value: state.visitType },
+      { label: '🕐 الفترة',        value: state.period === 'Morning' ? 'صباحاً 🌅' : 'مساءً 🌙' },
+      { label: '📅 التاريخ',       value: formatAr(state.date) },
+    ];
+    box.innerHTML = rows.map(r => `
+      <div class="summary-row">
+        <span class="label">${r.label}</span>
+        <span class="value">${r.value}</span>
+      </div>`).join('');
+
+    showStep(4);
+  }
+
+  // ─── Submit — يحفظ مباشرة في Firestore ───────────────
+  function submitBooking() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري الإرسال...';
+
+    const appt = {
+      id:          'appt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+      PatientName: state.name,
+      Phone:       state.phone,
+      BirthDate:   state.birth,
+      Address:     '',
+      VisitType:   state.visitType,
+      Date:        state.date,
+      Slot:        state.period,
+      Status:      'Pending',
+      source:      'online',
+      createdAt:   Date.now()
+    };
+
+    db.collection('appointments').doc(appt.id).set(appt)
+      .then(function() {
+        console.log('✓ saved to Firestore:', appt.id);
+        const ss = document.getElementById('successSummary');
+        ss.innerHTML = `
+          <div class="summary-row"><span class="label">الاسم</span><span class="value">${state.name}</span></div>
+          <div class="summary-row"><span class="label">نوع الزيارة</span><span class="value">${state.visitType}</span></div>
+          <div class="summary-row"><span class="label">التاريخ</span><span class="value">${formatAr(state.date)}</span></div>
+          <div class="summary-row"><span class="label">الفترة</span><span class="value">${state.period === 'Morning' ? 'صباحاً' : 'مساءً'}</span></div>
+        `;
+        showStep('Success');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
+      })
+      .catch(function(e) {
+        console.error('Firestore error:', e);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
+        alert('حدث خطأ أثناء الإرسال، يرجى المحاولة مجدداً');
+      });
+  }
+
+  // ─── Reset ────────────────────────────────────────────
+  function resetForm() {
+    state = { name:'', phone:'', birth:'', visitType:'', period:'', date:'' };
+    selectedPeriod = ''; selectedDate = '';
+    calDate = new Date(today);
+    document.getElementById('patientName').value  = '';
+    document.getElementById('patientPhone').value = '';
+    document.getElementById('patientBirth').value = '';
+    document.getElementById('visitType').value    = '';
+    document.getElementById('btnMorning').classList.remove('selected');
+    document.getElementById('btnEvening').classList.remove('selected');
+    document.getElementById('selectedDateDisplay').style.display = 'none';
+    document.getElementById('stepsBar').style.display = 'flex';
+    showStep(1);
+  }
+
+  // ─── Init — الأيام المغلقة من Firestore مباشرة ────────
+  showStep(1);
+  db.collection('config').doc('closedDays').onSnapshot(function(doc) {
+    if (doc.exists && Array.isArray(doc.data().days)) {
+      closedDays = doc.data().days;
+      if (document.getElementById('step3').style.display !== 'none') renderCalendar();
+    }
+  }, function(e) { console.warn('closedDays onSnapshot error:', e); });
+</script>
+</body>
+</html>
